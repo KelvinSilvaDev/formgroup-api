@@ -36,7 +36,6 @@ export class UsersController {
   create(@Req() @Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
-  @IsPublic()
   @ApiOperation({
     summary: 'Lista todos os usuários',
     description: 'Este endpoint retorna uma lista de todos os usuários ativos.',
