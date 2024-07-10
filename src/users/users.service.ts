@@ -7,7 +7,7 @@ import { Prisma, User } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
@@ -80,17 +80,35 @@ export class UsersService {
     });
   }
 
-  async findOne(id: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-    });
+  async findOne(email: string, password: string): Promise<User | undefined> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { email },
+      });
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (user && isMatch) {
 
-    if (!user || !user.isActive) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+        return user;
+      } else {
+        throw new Error(`User not found`);
+      }
+    } catch (err) {
+      throw new Error(`Error finding ${err} user ${err.message}`);
     }
-
-    return user;
   }
+
+
+  // async findOne(id: number) {
+  //   const user = await this.prisma.user.findUnique({
+  //     where: { id },
+  //   });
+
+  //   if (!user || !user.isActive) {
+  //     throw new NotFoundException(`User with ID ${id} not found`);
+  //   }
+
+  //   return user;
+  // }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.prisma.user.findUnique({

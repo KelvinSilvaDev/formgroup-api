@@ -8,10 +8,10 @@ async function bootstrap() {
   app.enableCors();
 
   const config = new DocumentBuilder()
-    .addBearerAuth()
     .setTitle('Movies API')
     .setDescription('A API de filmes para o Desafio Técnico Storm Group')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

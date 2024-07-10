@@ -3,7 +3,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { IsPublic } from 'src/auth/decorators/is-public.decorator';
+
 
 @ApiTags("users")
 @Controller('users')
@@ -31,7 +31,6 @@ export class UsersController {
   //   description: 'Senha pela qual o usuário irá se identificar na aplicação.',
   //   example: 'password'
   // })
-  @IsPublic()
   @Post()
   create(@Req() @Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
@@ -55,7 +54,7 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Usuário encontrado.' })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findById(+id);
   }
 
   @Patch(':id')

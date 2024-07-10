@@ -1,24 +1,24 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
-import { AuthController } from './auth.controller';
+import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginValidationMiddleware } from './middlewares/login-validation.middleware';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { LocalStrategy } from './strategies/local.strategy';
-import { UsersModule } from 'src/users/users.module';
 import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt'; 
+import { PrismaService } from 'src/prisma/prisma.service';
+import { AuthController } from './auth.controller';
+import { UsersModule } from 'src/users/users.module';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
-    PassportModule.register({ defaultStrategy: 'jwt' }),
     UsersModule,
+    PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1h' },
-    }),
-
+      signOptions: {
+        expiresIn: '1h'
+      }
+    })
   ],
-  controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, PrismaService, JwtStrategy],
+  controllers: [AuthController]
 })
-export class AuthModule { }
+export class AuthModule {}

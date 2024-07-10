@@ -1,29 +1,43 @@
-import {
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Post,
-  UseGuards,
-  Request,
-  Body,
-} from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { IsPublic } from './decorators/is-public.decorator';
-import { LocalAuthGuard } from './guards/local-auth-guard';
-import { AuthRequest } from './models/AuthRequest';
-import { LoginDto } from './dto/login.dto';
+import { LoginDto } from './dto/login-user.dto';
+import { AuthResponse } from './dto/auth-response.dto';
+import { User } from '.prisma/client';
+import { AuthGuard } from '@nestjs/passport';
+import { CreateUserDto } from './dto/register-user.dto';
+import AuthUser from 'src/common/decorators/auth-user.decorator';
+import { ApiBody } from '@nestjs/swagger';
 
-@Controller()
+@Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
 
-  @IsPublic()
-  @Post('login')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(LocalAuthGuard)
-  login(@Request() req: AuthRequest, @Body() loginDto: LoginDto) {
-    console.log(req.user);
+    constructor(private readonly authService: AuthService) { }
 
-    return this.authService.login(req.user);
-  }
+    @ApiBody({
+        type: LoginDto,
+        examples: {
+            default: {
+                value: {
+                    email: 'user@example.com',
+                    password: 'password'
+                }
+            },
+        }
+    })
+    @Post('/login')
+    login(@Body() loginDto: LoginDto): Promise<AuthResponse> {
+        return this.authService.login(loginDto);
+    }
+
+    @Post('/register')
+    register(@Body() createUserDto: CreateUserDto): Promise<AuthResponse> {
+        return this.authService.register(createUserDto);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get('/profile')
+    getLoggedUser(@AuthUser() user: User): User {
+        return user;
+    }
+
 }

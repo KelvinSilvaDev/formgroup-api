@@ -1,4 +1,5 @@
-import { Role } from "src/common/roles.enum";
+import { Role } from "@prisma/client";
+
 
 
 export class User {

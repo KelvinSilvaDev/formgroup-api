@@ -8,8 +8,6 @@ import { VoteMovieDto } from './dto/vote-movie.dto';
 // import { isPublic } from 'src/auth/decorators/is-public.decorator';
 import { Role } from 'src/common/roles.enum';
 import { IsAdmin } from './decorators/is-admin.decorator';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { AdminGuard } from 'src/auth/guards/adm.guard';
 
 
 @ApiTags('Movies')
