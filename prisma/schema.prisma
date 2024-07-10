@@ -28,7 +28,7 @@ model User {
 
 model Movie {
   id          Int       @id @default(autoincrement())
-  title       String
+  title       String    @unique
   description String
   releaseDate DateTime
   director    Director? @relation(fields: [directorId], references: [id])

@@ -1,21 +1,24 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { VoteMovieDto } from './dto/vote-movie.dto';
-import { Prisma, Movie } from '@prisma/client';
-
+import { Movie, Vote } from '@prisma/client';
 
 @Injectable()
 export class MoviesService {
-  constructor(private readonly prisma: PrismaService) { }
-
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createMovieDto: CreateMovieDto): Promise<Movie> {
     return this.prisma.$transaction(async (prisma) => {
-      let director;
-      let genre;
-  
+      let director: { id: number; name: string };
+      let genre: { id: number; name: string };
+
       // Verificar ou criar o diretor
       if (createMovieDto.directorId) {
         // Verifica se o diretor já existe com base no ID
@@ -39,7 +42,7 @@ export class MoviesService {
       } else {
         throw new Error('Either directorId or directorName must be provided.');
       }
-  
+
       // Verificar ou criar o gênero
       if (createMovieDto.genreId) {
         // Verifica se o gênero já existe com base no ID
@@ -63,7 +66,17 @@ export class MoviesService {
       } else {
         throw new Error('Either genreId or genreName must be provided.');
       }
-  
+
+      // Verificar se o filme já existe
+      const existingMovie = await prisma.movie.findUnique({
+        where: { title: createMovieDto.title },
+      });
+      if (existingMovie) {
+        throw new UnauthorizedException(
+          'Movie with this title already exists.',
+        );
+      }
+
       // Criar o filme
       return prisma.movie.create({
         data: {
@@ -77,161 +90,12 @@ export class MoviesService {
       });
     });
   }
-  
-
-  // async create(createMovieDto: CreateMovieDto): Promise<Movie> {
-  //   return this.prisma.$transaction(async (prisma) => {
-  //     // Verificar ou criar o diretor
-  //     let director = await prisma.director.findFirst({
-  //       where: { name: createMovieDto.directorName },
-  //     });
-  
-  //     // Se o diretor não existir, cria um novo
-  //     if (!director) {
-  //       director = await prisma.director.create({
-  //         data: {
-  //           name: createMovieDto.directorName,  // Adicionando o nome do diretor
-  //         },
-  //       });
-  //     }
-  
-  //     // Verificar ou criar o gênero
-  //     let genre = await prisma.genre.findFirst({
-  //       where: { name: createMovieDto.genreName },
-  //     });
-  
-  //     // Se o gênero não existir, cria um novo
-  //     if (!genre) {
-  //       genre = await prisma.genre.create({
-  //         data: {
-  //           name: createMovieDto.genreName,  // Adicionando o nome do gênero
-  //         },
-  //       });
-  //     }
-  
-  //     // Criar o filme
-  //     return prisma.movie.create({
-  //       data: {
-  //         title: createMovieDto.title,
-  //         description: createMovieDto.description,
-  //         releaseDate: createMovieDto.releaseDate,
-  //         director: { connect: { id: director.id } },
-  //         genre: { connect: { id: genre.id } },
-  //         isActive: createMovieDto.isActive,
-  //       },
-  //     });
-  //   });
-  // }
-  
-  
-  
-
-  // async create(createMovieDto: CreateMovieDto): Promise<Movie> {
-  //   return this.prisma.$transaction(async (prisma) => {
-  //     // Verificar se o diretor existe pelo nome
-  //     let director = await prisma.director.findFirst({
-  //       where: { name: createMovieDto.directorName },
-  //     });
-  
-  //     // Se o diretor não existir, cria um novo
-  //     if (!director) {
-  //       director = await prisma.director.create({
-  //         data: {
-  //           name: createMovieDto.directorName,
-  //         },
-  //       });
-  //     }
-  
-  //     // Verificar se o gênero existe pelo nome
-  //     let genre = await prisma.genre.findFirst({
-  //       where: { name: createMovieDto.genreName },
-  //     });
-  
-  //     // Se o gênero não existir, cria um novo
-  //     if (!genre) {
-  //       genre = await prisma.genre.create({
-  //         data: {
-  //           name: createMovieDto.genreName,
-  //         },
-  //       });
-  //     }
-  
-  //     // Criar o filme
-  //     return prisma.movie.create({
-  //       data: {
-  //         title: createMovieDto.title,
-  //         description: createMovieDto.description,
-  //         releaseDate: createMovieDto.releaseDate,
-  //         director: { connect: { id: director.id } },
-  //         genre: { connect: { id: genre.id } },
-  //         isActive: createMovieDto.isActive,
-  //       },
-  //     });
-  //   });
-  // }
-  
-  
-  
-  
-  
-
-  // async create(createMovieDto: CreateMovieDto): Promise<Movie> {
-  //   return this.prisma.$transaction(async (prisma) => {
-  //     // Verificar ou criar o diretor
-  //     const director = await prisma.director.upsert({
-  //       where: { id: createMovieDto.directorId },
-  //       update: {},  // Não atualiza nada, apenas garante que o diretor existe
-  //       create: {
-  //         id: createMovieDto.directorId,
-  //         name: createMovieDto.directorName,  // Adicionando o nome do diretor
-  //       },
-  //     });
-  
-  //     // Verificar ou criar o gênero
-  //     const genre = await prisma.genre.upsert({
-  //       where: { id: createMovieDto.genreId },
-  //       update: {},  // Não atualiza nada, apenas garante que o gênero existe
-  //       create: {
-  //         id: createMovieDto.genreId,
-  //         name: createMovieDto.genreName,  // Adicionando o nome do gênero
-  //       },
-  //     });
-  
-  //     // Criar o filme
-  //     return prisma.movie.create({
-  //       data: {
-  //         title: createMovieDto.title,
-  //         description: createMovieDto.description,
-  //         releaseDate: createMovieDto.releaseDate,
-  //         director: { connect: { id: director.id } },
-  //         genre: { connect: { id: genre.id } },
-  //         isActive: createMovieDto.isActive,
-  //       },
-  //     });
-  //   });
-  // }
-  
-
-
-
-  // async create(createMovieDto: CreateMovieDto): Promise<Movie> {
-  //   return this.prisma.movie.create({
-  //     data: {
-  //       title: createMovieDto.title,
-  //       description: createMovieDto.description,
-  //       releaseDate: createMovieDto.releaseDate,
-  //       director: createMovieDto.directorId ? { connect: { id: createMovieDto.directorId } } : undefined,
-  //       genre: createMovieDto.genreId ? { connect: { id: createMovieDto.genreId } } : undefined,
-  //       isActive: createMovieDto.isActive,
-  //     },
-  //   });
-  // }
-
-
-
 
   async findAll(): Promise<Movie[]> {
     return this.prisma.movie.findMany({
+      where: {
+        isActive: true,
+      },
       include: {
         votes: true,
         movieActors: true,
@@ -239,10 +103,12 @@ export class MoviesService {
     });
   }
 
-
   async findOne(id: number): Promise<Movie> {
     return this.prisma.movie.findUnique({
-      where: { id },
+      where: {
+        id,
+        isActive: true,
+      },
       include: {
         votes: true,
         movieActors: true,
@@ -257,130 +123,116 @@ export class MoviesService {
         title: updateMovieDto.title,
         description: updateMovieDto.description,
         releaseDate: updateMovieDto.releaseDate,
-        director: updateMovieDto.directorId ? { connect: { id: updateMovieDto.directorId } } : undefined,
-        genre: updateMovieDto.genreId ? { connect: { id: updateMovieDto.genreId } } : undefined,
+        director: updateMovieDto.directorId
+          ? { connect: { id: updateMovieDto.directorId } }
+          : undefined,
+        genre: updateMovieDto.genreId
+          ? { connect: { id: updateMovieDto.genreId } }
+          : undefined,
         isActive: updateMovieDto.isActive,
       },
     });
   }
 
   async remove(id: number): Promise<Movie> {
-    return this.prisma.movie.delete({
+    return this.prisma.movie.update({
       where: { id },
+      data: {
+        isActive: false,
+      },
     });
   }
 
-  async vote(movieId: number, voteMovieDto: VoteMovieDto): Promise<void> {
-    await this.prisma.vote.create({
+  async vote(
+    movieId: number,
+    voteMovieDto: VoteMovieDto,
+  ): Promise<{ status: string; message: string; data?: Vote }> {
+    const voteExists = await this.prisma.vote.findFirst({
+      where: {
+        userId: voteMovieDto.userId,
+        movieId,
+        score: voteMovieDto.vote,
+      },
+    });
+
+    if (voteExists) {
+      throw new HttpException(
+        'Voto já realizado com a mesma pontuação',
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    const voteUpdating = await this.prisma.vote.findFirst({
+      where: {
+        userId: voteMovieDto.userId,
+        movieId,
+      },
+    });
+
+    if (voteUpdating) {
+      const updatedVote = await this.prisma.vote.update({
+        where: { id: voteUpdating.id },
+        data: {
+          score: voteMovieDto.vote,
+        },
+      });
+      return {
+        status: 'success',
+        message: 'Voto atualizado com sucesso',
+        data: updatedVote,
+      };
+    }
+
+    const newVote = await this.prisma.vote.create({
       data: {
         score: voteMovieDto.vote,
         user: { connect: { id: voteMovieDto.userId } },
         movie: { connect: { id: movieId } },
       },
     });
+
+    return {
+      status: 'success',
+      message: 'Voto registrado com sucesso',
+      data: newVote,
+    };
   }
 
-
-
-
-
-
-  // async create(createMovieDto: CreateMovieDto): Promise<Movie> {
-
-  //   const movie = createMovieDto
-  //   const newMovie = await this.prisma.movie.create({
-  //     data: {
-  //       title: movie.title,
-  //       description: movie.description,
-  //       releaseDate: movie.releaseDate,
+  // async vote(movieId: number, voteMovieDto: VoteMovieDto): Promise<void> {
+  //   const voteExists = await this.prisma.vote.findFirst({
+  //     where: {
+  //       userId: voteMovieDto.userId,
+  //       movieId,
+  //       score: voteMovieDto.vote,
   //     },
-  //     include: {
-  //       votes: movie.votes
-  //     }
-  //   })
+  //   });
 
-  //   return newMovie
+  //   if (voteExists) {
+  //     throw new UnauthorizedException('Voto já realizado');
+  //   }
 
-  // const { directorId, genreId, actors, ...data } = createMovieDto;
+  //   const voteUpdating = await this.prisma.vote.findFirst({
+  //     where: {
+  //       userId: voteMovieDto.userId,
+  //       movieId,
+  //     },
+  //   });
 
-  // const movie = await this.prisma.movie.create({
-  //   data: {
-  //     ...data,
-  //     director: directorId ? { connect: { id: directorId } } : undefined,
-  //     genre: genreId ? { connect: { id: genreId } } : undefined,
-  //     movieActors: actors ? { create: actors.map(actorId => ({ actor: { connect: { id: actorId } } })) } : undefined,
-  //   },
-  //   include: {
-  //     director: true,
-  //     genre: true,
-  //     movieActors: {
-  //       include: {
-  //         actor: true,
+  //   if (voteUpdating) {
+  //     await this.prisma.vote.update({
+  //       where: { id: voteUpdating.id },
+  //       data: {
+  //         score: voteMovieDto.vote,
   //       },
-  //     },
-  //   },
-  // });
-
-  // const averageVote = movie.votes.length > 0 ? movie.votes.reduce((acc, vote) => acc + vote.value, 0) / movie.votes.length : 0;
-
-  // return {
-  //   ...movie,
-  //   actors: movie.movieActors.map(ma => ma.actor),
-  //   averageVote,
-  // };
-  // }
-
-
-
-  // async findAll(): Promise<Movie[]> {
-  //   return this.prisma.movie.findMany({ where: { isActive: true } });
-  // }
-
-  // async findOne(id: number): Promise<Movie> {
-  //   const movie = await this.prisma.movie.findUnique({ where: { id } });
-  //   if (!movie || !movie.isActive) {
-  //     throw new NotFoundException(`Movie with ID ${id} not found`);
+  //     });
   //   }
-  //   return movie;
-  // }
 
-  // async update(id: number, updateMovieDto: UpdateMovieDto): Promise<Movie> {
-  //   const movie = await this.prisma.movie.findUnique({ where: { id } });
-  //   if (!movie || !movie.isActive) {
-  //     throw new NotFoundException(`Movie with ID ${id} not found`);
-  //   }
-  //   return this.prisma.movie.update({ where: { id }, data: updateMovieDto });
-  // }
-
-  // async remove(id: number): Promise<Movie> {
-  //   const movie = await this.prisma.movie.findUnique({ where: { id } });
-  //   if (!movie || !movie.isActive) {
-  //     throw new NotFoundException(`Movie with ID ${id} not found`);
-  //   }
-  //   return this.prisma.movie.update({ where: { id }, data: { isActive: false } });
-  // }
-
-  // async vote(id: number, voteMovieDto: VoteMovieDto): Promise<Movie> {
-  //   const movie = await this.prisma.movie.findUnique({
-  //     where: { id },
-  //     include: { votes: true },
-  //   });
-  //   if (!movie || !movie.isActive) {
-  //     throw new NotFoundException(`Movie with ID ${id} not found`);
-  //   }
-  //   const newVote = await this.prisma.vote.create({
+  //   await this.prisma.vote.create({
   //     data: {
-  //       movieId: id,
-  //       vote: voteMovieDto.vote,
+  //       score: voteMovieDto.vote,
+  //       user: { connect: { id: voteMovieDto.userId } },
+  //       movie: { connect: { id: movieId } },
   //     },
   //   });
-  //   const updatedVotes = [...movie.votes, newVote.vote];
-  //   const averageVote = updatedVotes.reduce((a, b) => a + b) / updatedVotes.length;
-  //   return this.prisma.movie.update({
-  //     where: { id },
-  //     data: { votes: updatedVotes, averageVote },
-  //   });
   // }
-
-
 }
