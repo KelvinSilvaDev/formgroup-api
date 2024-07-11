@@ -9,6 +9,7 @@ import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { VoteMovieDto } from './dto/vote-movie.dto';
 import { Movie, Vote } from '@prisma/client';
+import { FilterMoviesDto } from 'src/common/filters/filter-movies.dto';
 
 @Injectable()
 export class MoviesService {
@@ -197,6 +198,312 @@ export class MoviesService {
       data: newVote,
     };
   }
+
+  async getMovies(
+    filters: FilterMoviesDto,
+    page: number = 1,
+    pageSize: number = 10,
+  ) {
+    const { director, name, genre, actor } = filters;
+
+    const where: any = {
+      AND: [],
+    };
+
+    if (director) {
+      where.AND.push({
+        director: {
+          name: {
+            contains: director,
+            mode: 'insensitive',
+          },
+        },
+      });
+    }
+
+    if (name) {
+      where.AND.push({
+        title: {
+          contains: name,
+          mode: 'insensitive',
+        },
+      });
+    }
+
+    if (genre) {
+      where.AND.push({
+        genre: {
+          name: {
+            contains: genre,
+            mode: 'insensitive',
+          },
+        },
+      });
+    }
+
+    if (actor) {
+      where.AND.push({
+        movieActors: {
+          some: {
+            actor: {
+              name: {
+                contains: actor,
+                mode: 'insensitive',
+              },
+            },
+          },
+        },
+      });
+    }
+
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+
+    const movies = await this.prisma.movie.findMany({
+      where: where.AND.length > 0 ? where : undefined,
+      skip,
+      take,
+      include: {
+        director: true,
+        genre: true,
+        movieActors: {
+          include: {
+            actor: true,
+          },
+        },
+      },
+    });
+
+    const totalMovies = await this.prisma.movie.count({
+      where: where.AND.length > 0 ? where : undefined,
+    });
+
+    return {
+      movies: movies.map((movie) => ({
+        ...movie,
+        actors: movie.movieActors.map((ma) => ma.actor),
+      })),
+      total: totalMovies,
+      page,
+      pageSize,
+    };
+  }
+
+  // async getMovies(filters: FilterMoviesDto) {
+  //   const { director, name, genre, actor } = filters;
+
+  //   const where: any = {
+  //     AND: [],
+  //   };
+
+  //   if (director) {
+  //     where.AND.push({
+  //       director: {
+  //         name: {
+  //           contains: director,
+  //           mode: 'insensitive',
+  //         },
+  //       },
+  //     });
+  //   }
+
+  //   if (name) {
+  //     where.AND.push({
+  //       title: {
+  //         contains: name,
+  //         mode: 'insensitive',
+  //       },
+  //     });
+  //   }
+
+  //   if (genre) {
+  //     where.AND.push({
+  //       genre: {
+  //         name: {
+  //           contains: genre,
+  //           mode: 'insensitive',
+  //         },
+  //       },
+  //     });
+  //   }
+
+  //   if (actor) {
+  //     where.AND.push({
+  //       movieActors: {
+  //         some: {
+  //           actor: {
+  //             name: {
+  //               contains: actor,
+  //               mode: 'insensitive',
+  //             },
+  //           },
+  //         },
+  //       },
+  //     });
+  //   }
+
+  //   const movies = await this.prisma.movie.findMany({
+  //     where,
+  //     include: {
+  //       director: true,
+  //       genre: true,
+  //       movieActors: {
+  //         include: {
+  //           actor: true,
+  //         },
+  //       },
+  //     },
+  //   });
+
+  //   return movies.map((movie) => ({
+  //     ...movie,
+  //     actors: movie.movieActors.map((ma) => ma.actor),
+  //   }));
+  // }
+
+  // async getMovies(filters: FilterMoviesDto) {
+  //   const { director, name, genre, actor } = filters;
+
+  //   const where: any = {
+  //     AND: [],
+  //   };
+
+  //   if (director) {
+  //     where.AND.push({
+  //       director: {
+  //         name: {
+  //           contains: director,
+  //           mode: 'insensitive',
+  //         },
+  //       },
+  //     });
+  //   }
+
+  //   if (name) {
+  //     where.AND.push({
+  //       title: {
+  //         contains: name,
+  //         mode: 'insensitive',
+  //       },
+  //     });
+  //   }
+
+  //   if (genre) {
+  //     where.AND.push({
+  //       genre: {
+  //         name: {
+  //           contains: genre,
+  //           mode: 'insensitive',
+  //         },
+  //       },
+  //     });
+  //   }
+
+  //   if (actor) {
+  //     where.AND.push({
+  //       movieActors: {
+  //         some: {
+  //           actor: {
+  //             name: {
+  //               contains: actor,
+  //               mode: 'insensitive',
+  //             },
+  //           },
+  //         },
+  //       },
+  //     });
+  //   }
+
+  //   const movies = await this.prisma.movie.findMany({
+  //     where: where.AND.length > 0 ? where : undefined,
+  //     include: {
+  //       director: true,
+  //       genre: true,
+  //       movieActors: {
+  //         include: {
+  //           actor: true,
+  //         },
+  //       },
+  //     },
+  //   });
+
+  //   return movies.map((movie) => ({
+  //     ...movie,
+  //     actors: movie.movieActors.map((ma) => ma.actor),
+  //   }));
+  // }
+
+  // async getMovies(filters: FilterMoviesDto) {
+  //   const { director, name, genre, actor } = filters;
+
+  //   const where: any = {
+  //     AND: [],
+  //   };
+
+  //   if (director) {
+  //     where.AND.push({
+  //       director: {
+  //         name: {
+  //           contains: director,
+  //           mode: 'insensitive',
+  //         },
+  //       },
+  //     });
+  //   }
+
+  //   if (name) {
+  //     where.AND.push({
+  //       title: {
+  //         contains: name,
+  //         mode: 'insensitive',
+  //       },
+  //     });
+  //   }
+
+  //   if (genre) {
+  //     where.AND.push({
+  //       genre: {
+  //         name: {
+  //           contains: genre,
+  //           mode: 'insensitive',
+  //         },
+  //       },
+  //     });
+  //   }
+
+  //   if (actor) {
+  //     where.AND.push({
+  //       movieActors: {
+  //         some: {
+  //           actor: {
+  //             name: {
+  //               contains: actor,
+  //               mode: 'insensitive',
+  //             },
+  //           },
+  //         },
+  //       },
+  //     });
+  //   }
+
+  //   const movies = await this.prisma.movie.findMany({
+  //     where: where.AND.length > 0 ? where : undefined,
+  //     include: {
+  //       director: true,
+  //       genre: true,
+  //       movieActors: {
+  //         include: {
+  //           actor: true,
+  //         },
+  //       },
+  //     },
+  //   });
+
+  //   return movies.map((movie) => ({
+  //     ...movie,
+  //     actors: movie.movieActors.map((ma) => ma.actor),
+  //   }));
+  // }
 
   // async vote(movieId: number, voteMovieDto: VoteMovieDto): Promise<void> {
   //   const voteExists = await this.prisma.vote.findFirst({

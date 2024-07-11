@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { MoviesService } from './movies.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
@@ -24,6 +25,7 @@ import { VoteMovieDto } from './dto/vote-movie.dto';
 // import { isPublic } from 'src/auth/decorators/is-public.decorator';
 import { Role } from 'src/common/roles.enum';
 import { AdminGuard } from 'src/auth/admin.guard';
+import { FilterMoviesDto } from 'src/common/filters/filter-movies.dto';
 // import { IsAdmin } from './decorators/is-admin.decorator';
 // import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 // import { AdminGuard } from 'src/auth/guards/adm.guard';
@@ -77,14 +79,35 @@ export class MoviesController {
     return this.moviesService.create(createMovieDto);
   }
 
+  // @Get()
+  // @ApiOperation({ summary: 'Listar todos os filmes' })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Lista de filmes retornada com sucesso.',
+  // })
+  // findAll() {
+  //   return this.moviesService.findAll();
+  // }
+
   @Get()
   @ApiOperation({ summary: 'Listar todos os filmes' })
   @ApiResponse({
     status: 200,
     description: 'Lista de filmes retornada com sucesso.',
   })
-  findAll() {
-    return this.moviesService.findAll();
+  async getMovies(
+    @Query() filters: FilterMoviesDto,
+    @Query('page') page: string = '1',
+    @Query('pageSize') pageSize: string = '10',
+  ) {
+    const pageNumber = parseInt(page, 10) || 1;
+    const pageSizeNumber = parseInt(pageSize, 10) || 10;
+
+    return await this.moviesService.getMovies(
+      filters,
+      pageNumber,
+      pageSizeNumber,
+    );
   }
 
   @Get(':id')
