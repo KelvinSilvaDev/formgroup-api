@@ -6,8 +6,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors();
-  
+
   const config = new DocumentBuilder()
+    .addBearerAuth()
     .setTitle('Movies API')
     .setDescription('A API de filmes para o Desafio Técnico Storm Group')
     .setVersion('1.0')

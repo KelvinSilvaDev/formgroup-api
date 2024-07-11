@@ -3,10 +3,50 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma, User } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) {}
+
+
+  async createUser(data: Prisma.UserCreateInput): Promise<User> {
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    return this.prisma.user.create({
+      data: {
+        ...data,
+        password: hashedPassword,
+      },
+    });
+  }
+
+  async findUserByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
+  }
+
+  async findUserByUsername(username: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { username },
+    });
+  }
+
+
+  async findById(id: number) {
+    return this.prisma.user.findUnique({
+      where: { id },
+    });
+  }
+
+  async findByUsername(username: string) {
+    return this.prisma.user.findUnique({
+      where: { username },
+    });
+  }
+
+
+
   async create(createUserDto: CreateUserDto) {
     const data = {
       ...createUserDto,
