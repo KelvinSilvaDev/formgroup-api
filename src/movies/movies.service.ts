@@ -84,6 +84,7 @@ export class MoviesService {
           title: createMovieDto.title,
           description: createMovieDto.description,
           releaseDate: createMovieDto.releaseDate,
+          photoUrl: createMovieDto.photoUrl,
           director: { connect: { id: director.id } },
           genre: { connect: { id: genre.id } },
           isActive: createMovieDto.isActive,

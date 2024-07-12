@@ -32,6 +32,7 @@ model Movie {
   description String
   releaseDate DateTime
   director    Director? @relation(fields: [directorId], references: [id])
+  photoUrl    String?
   directorId  Int?
   genre       Genre?    @relation(fields: [genreId], references: [id])
   genreId     Int?
