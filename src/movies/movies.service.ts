@@ -279,6 +279,8 @@ export class MoviesService {
       where: where.AND.length > 0 ? where : undefined,
     });
 
+    const totalPages = Math.ceil(totalMovies / pageSize);
+
     return {
       movies: movies.map((movie) => ({
         ...movie,
@@ -287,6 +289,7 @@ export class MoviesService {
       total: totalMovies,
       page,
       pageSize,
+      totalPages,
     };
   }
 
