@@ -18,6 +18,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -26,6 +27,7 @@ import { VoteMovieDto } from './dto/vote-movie.dto';
 import { Role } from 'src/common/roles.enum';
 import { AdminGuard } from 'src/auth/admin.guard';
 import { FilterMoviesDto } from 'src/common/filters/filter-movies.dto';
+import { Movie } from './entities/movie.entity';
 // import { IsAdmin } from './decorators/is-admin.decorator';
 // import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 // import { AdminGuard } from 'src/auth/guards/adm.guard';
@@ -38,7 +40,6 @@ export class MoviesController {
   @UseGuards(AdminGuard)
   @ApiBearerAuth()
   @Post()
-  // @isPublic()
   @ApiOperation({ summary: 'Cadastrar um novo filme' })
   @ApiBody({
     type: CreateMovieDto,
@@ -75,30 +76,80 @@ export class MoviesController {
     description: 'Apenas administradores podem cadastrar filmes.',
   })
   create(@Body() createMovieDto: CreateMovieDto) {
-    console.log('Create Movie DTO:', createMovieDto); // Adicione isto para verificar o DTO
     return this.moviesService.create(createMovieDto);
   }
 
-  // @Get()
-  // @ApiOperation({ summary: 'Listar todos os filmes' })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Lista de filmes retornada com sucesso.',
-  // })
-  // findAll() {
-  //   return this.moviesService.findAll();
-  // }
-
   @Get()
-  @ApiOperation({ summary: 'Listar todos os filmes' })
+  @ApiOperation({
+    summary: 'Obter uma lista de filmes com filtros, paginação e ordenação.',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Lista de filmes retornada com sucesso.',
+    description: 'Lista de filmes com base nos filtros aplicados.',
+    type: [Movie], // Defina o tipo da resposta conforme sua estrutura
+  })
+  @ApiQuery({
+    name: 'director',
+    description: 'Filtrar filmes pelo nome do diretor.',
+    example: 'Steven Spielberg',
+    required: false,
+    type: String,
+  })
+  @ApiQuery({
+    name: 'name',
+    description: 'Filtrar filmes pelo título.',
+    example: 'Titanic',
+    required: false,
+    type: String,
+  })
+  @ApiQuery({
+    name: 'genre',
+    description: 'Filtrar filmes pelo nome do gênero.',
+    example: 'Drama',
+    required: false,
+    type: String,
+  })
+  @ApiQuery({
+    name: 'actor',
+    description: 'Filtrar filmes pelo nome do ator.',
+    example: 'Leonardo DiCaprio',
+    required: false,
+    type: String,
+  })
+  @ApiQuery({
+    name: 'page',
+    description: 'Número da página para paginação.',
+    example: 1,
+    required: false,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    description: 'Número de filmes por página.',
+    example: 10,
+    required: false,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    description: 'Campo pelo qual os filmes serão ordenados.',
+    example: 'releaseDate',
+    required: false,
+    type: String,
+  })
+  @ApiQuery({
+    name: 'order',
+    description: 'Ordem da ordenação dos filmes.',
+    example: 'asc',
+    required: false,
+    enum: ['asc', 'desc'],
   })
   async getMovies(
     @Query() filters: FilterMoviesDto,
     @Query('page') page: string = '1',
     @Query('pageSize') pageSize: string = '10',
+    @Query('sortBy') sortBy?: string,
+    @Query('order') order: 'asc' | 'desc' = 'asc',
   ) {
     const pageNumber = parseInt(page, 10) || 1;
     const pageSizeNumber = parseInt(pageSize, 10) || 10;
@@ -107,6 +158,8 @@ export class MoviesController {
       filters,
       pageNumber,
       pageSizeNumber,
+      sortBy,
+      order,
     );
   }
 

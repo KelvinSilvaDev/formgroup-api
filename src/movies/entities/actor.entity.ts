@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { MovieActor } from '../dto/movie-actor.entity';
+import { Movie } from './movie.entity';
 
 export class Actor {
   @ApiProperty()
@@ -8,6 +8,6 @@ export class Actor {
   @ApiProperty()
   name: string;
 
-  @ApiProperty({ type: [MovieActor] })
-  movieActors: MovieActor[];
+  @ApiProperty({ type: () => [Movie] })
+  movies: Movie[];
 }

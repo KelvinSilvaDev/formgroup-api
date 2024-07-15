@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Movie } from './movie.entity';
 
-
 export class Director {
   @ApiProperty()
   id: number;
@@ -9,6 +8,6 @@ export class Director {
   @ApiProperty()
   name: string;
 
-  @ApiProperty({ type: [Movie] })
+  @ApiProperty({ type: () => [Movie] })
   movies: Movie[];
 }

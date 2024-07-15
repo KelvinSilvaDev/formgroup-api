@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
@@ -9,8 +13,17 @@ import { Prisma, User } from '@prisma/client';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
+    const userExists = await this.prisma.user.findUnique({
+      where: {
+        email: data.email,
+      },
+    });
+
+    if (userExists) {
+      throw new UnauthorizedException('Usuário já cadastrado');
+    }
+
     const hashedPassword = await bcrypt.hash(data.password, 10);
     return this.prisma.user.create({
       data: {
@@ -32,7 +45,6 @@ export class UsersService {
     });
   }
 
-
   async findById(id: number) {
     return this.prisma.user.findUnique({
       where: { id },
@@ -45,8 +57,6 @@ export class UsersService {
     });
   }
 
-
-
   async create(createUserDto: CreateUserDto) {
     const data = {
       ...createUserDto,
@@ -58,7 +68,7 @@ export class UsersService {
     return {
       ...createdUser,
       password: undefined,
-    }
+    };
   }
 
   async findAll() {
@@ -136,7 +146,6 @@ export class UsersService {
       },
     });
   }
-
 
   findByEmail(email: string) {
     return this.prisma.user.findUnique({
