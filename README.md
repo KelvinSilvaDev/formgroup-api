@@ -16,7 +16,8 @@
 10. [Considerações de Segurança](#considera%C3%A7%C3%B5es-de-seguran%C3%A7a)
 11. [Execução do Projeto](#execu%C3%A7%C3%A3o-do-projeto)
 12. [Evoluções Futuras](#evolu%C3%A7%C3%B5es-futuras)
-13. [Contato](#contato)
+13. [Deploy](#deploy)
+14. [Contato](#contato)
 
 ## Introdução
 
@@ -157,6 +158,18 @@ Componentes React reutilizáveis para formulários, listagens e detalhes.
 1. Clonar o repositório
 2. Instalar dependências: `npm install` ou `yarn install`
 3. Iniciar a aplicação: `npm run dev
+
+
+## Deploy
+
+O deploy do frontend foi realizado na vercel e pode ser acessado através do link:
+https://stormgroup-movies.vercel.app/
+
+O backend e o banco de dados por sua vez estão hospedados na Render e a api online pode ser acessada através do seguinte link:
+https://formgroup-api.onrender.com/api
+
+Infelizmente ambos os repositórios usam planos gratuitos desses serviços e por conta disso problemas de performance podem ocorrer durante o uso da aplicação online.
+
 
 ## Evoluções Futuras
 
