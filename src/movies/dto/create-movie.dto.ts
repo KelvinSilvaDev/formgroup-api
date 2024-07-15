@@ -1,34 +1,43 @@
 // src/movies/dto/create-movie.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsArray, IsDate, IsOptional, IsInt, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsArray,
+  IsDate,
+  IsOptional,
+  IsInt,
+  IsBoolean,
+} from 'class-validator';
 import { Vote } from '../entities/vote.entity';
 
 export class CreateMovieDto {
-    @IsString()
-    title: string;
-  
-    @IsString()
-    description: string;
-  
-    @IsDate()
-    releaseDate: Date;
-  
-    @IsOptional()
-    @IsInt()
-    directorId?: number;
+  @IsString()
+  title: string;
 
-    directorName?: string;
+  @IsString()
+  description: string;
 
-  
-    @IsOptional()
-    @IsInt()
-    genreId?: number;
+  @IsDate()
+  releaseDate: Date;
 
-    genreName?: string;
+  @IsOptional()
+  @IsInt()
+  directorId?: number;
 
-    
-    @IsOptional()
-    @IsBoolean()
-    isActive?: boolean;
-  
+  directorName?: string;
+
+  @IsOptional()
+  @IsInt()
+  genreId?: number;
+
+  genreName?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+
+  @IsOptional()
+  @IsString()
+  photoUrl?: string;
 }

@@ -8,6 +8,6 @@ export class Genre {
   @ApiProperty()
   name: string;
 
-  @ApiProperty({ type: [Movie] })
+  @ApiProperty({ type: () => [Movie] })
   movies: Movie[];
 }

@@ -1,21 +1,35 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Req,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { IsPublic } from 'src/auth/decorators/is-public.decorator';
 
-@ApiTags("users")
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @ApiOperation({
     summary: 'Cadastra um usuário',
-    description:
-      'Este endpoint cadastra um usuário no banco de dados.',
+    description: 'Este endpoint cadastra um usuário no banco de dados.',
   })
-  @ApiBody({type: CreateUserDto})
+  @ApiBody({ type: CreateUserDto })
   // @ApiParam({
   //   name: 'username',
   //   description: 'Nome de usuário que deve ser usado para identificação',
@@ -40,7 +54,10 @@ export class UsersController {
     summary: 'Lista todos os usuários',
     description: 'Este endpoint retorna uma lista de todos os usuários ativos.',
   })
-  @ApiResponse({ status: 200, description: 'Lista de usuários retornada com sucesso.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de usuários retornada com sucesso.',
+  })
   @Get()
   findAll() {
     return this.usersService.findAll();
@@ -49,7 +66,8 @@ export class UsersController {
   @Get(':id')
   @ApiOperation({
     summary: 'Busca um usuário por ID',
-    description: 'Este endpoint retorna os detalhes de um usuário específico pelo ID.',
+    description:
+      'Este endpoint retorna os detalhes de um usuário específico pelo ID.',
   })
   @ApiParam({ name: 'id', description: 'ID do usuário', example: 1 })
   @ApiResponse({ status: 200, description: 'Usuário encontrado.' })
@@ -61,7 +79,8 @@ export class UsersController {
   @Patch(':id')
   @ApiOperation({
     summary: 'Atualiza um usuário',
-    description: 'Este endpoint atualiza os dados de um usuário específico pelo ID.',
+    description:
+      'Este endpoint atualiza os dados de um usuário específico pelo ID.',
   })
   @ApiParam({ name: 'id', description: 'ID do usuário', example: 1 })
   @ApiBody({ type: UpdateUserDto })
@@ -74,13 +93,16 @@ export class UsersController {
   @Delete(':id')
   @ApiOperation({
     summary: 'Exclusão lógica de um usuário',
-    description: 'Este endpoint marca um usuário como inativo, em vez de removê-lo fisicamente.',
+    description:
+      'Este endpoint marca um usuário como inativo, em vez de removê-lo fisicamente.',
   })
   @ApiParam({ name: 'id', description: 'ID do usuário', example: 1 })
-  @ApiResponse({ status: 200, description: 'Usuário excluído logicamente com sucesso.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuário excluído logicamente com sucesso.',
+  })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
   }
-
 }

@@ -6,11 +6,11 @@ export class Vote {
   id: number;
 
   @ApiProperty()
-  value: number;
+  rating: number;
 
   @ApiProperty()
-  movieId: number;
+  userId: number;
 
-  @ApiProperty({ type: Movie })
+  @ApiProperty({ type: () => Movie })
   movie: Movie;
 }
